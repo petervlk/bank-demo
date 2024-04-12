@@ -1,0 +1,53 @@
+name: Push
+
+on: push
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install clj-kondo
+      uses: DeLaGuardo/setup-clojure@12.5
+      with:
+        clj-kondo: latest
+
+    - name: Fetch code
+      uses: actions/checkout@v4
+
+    - name: Lint
+      run: clj-kondo --lint src test --config '{:output {:pattern "::{{level}} file={{filename}},line={{row}},col={{col}}::{{message}}"}}'
+
+  code-style:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install clj-style
+      uses: DeLaGuardo/setup-clojure@12.5
+      with:
+        cljstyle: 0.16.626
+
+    - name: Fetch code
+      uses: actions/checkout@v4
+
+    - name: Check code formatting
+      run: cljstyle check
+
+  test:
+    runs-on: ubuntu-latest
+    needs: [lint, code-style]
+    steps:
+    - name: Install Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+
+    - name: Install clojure tools
+      uses: DeLaGuardo/setup-clojure@12.5
+      with:
+        cli: latest
+
+    - name: Fetch code
+      uses: actions/checkout@v4
+
+    - name: Test
+      run: bin/kaocha
