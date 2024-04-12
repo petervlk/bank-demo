@@ -1,0 +1,2 @@
+{:bank-demo/server  {:port 9010 :handler #ig/ref :bank-demo/handler}
+ :bank-demo/handler {}}

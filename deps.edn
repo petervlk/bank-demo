@@ -1,0 +1,10 @@
+{:paths ["src" "resources"]
+ :deps  {org.clojure/clojure       {:mvn/version "1.11.2"}
+         integrant/integrant       {:mvn/version "0.8.1"}
+         ring/ring-jetty-adapter   {:mvn/version "1.12.1"}
+         ;; logging
+         com.taoensso/timbre       {:mvn/version "5.2.1"}
+         com.fzakaria/slf4j-timbre {:mvn/version "0.3.21"}
+         org.slf4j/slf4j-api       {:mvn/version "1.7.36"}}
+ :aliases
+ {:run-m {:main-opts ["-m" "bank-demo.core"]}}}
