@@ -6,7 +6,9 @@
 
 (defmethod ig/init-key :bank-demo/server [_ {:keys [port handler]}]
   (log/info "Starting server")
-  (run-jetty handler {:port port :join? false}))
+  (run-jetty handler {:port port
+                      :async? true
+                      :join? false}))
 
 (defmethod ig/halt-key! :bank-demo/server [_ jetty]
   (log/info "Stopping server")

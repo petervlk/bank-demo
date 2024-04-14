@@ -1,2 +1,5 @@
-{:bank-demo/server  {:port 9010 :handler #ig/ref :bank-demo/handler}
- :bank-demo/handler {}}
+{:bank-demo.handler/router {}
+ :bank-demo.handler/default-handler {}
+ :bank-demo.handler/app {:router #ig/ref :bank-demo.handler/router
+                         :default-handler #ig/ref :bank-demo.handler/default-handler}
+ :bank-demo/server  {:port 9010 :handler #ig/ref :bank-demo.handler/app}}
