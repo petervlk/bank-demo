@@ -14,5 +14,22 @@
          {:status 201
           :body new-account})
        (throw (ex-info "Failed to create a new account" req-body))))
-    ([request respond _raise]
-     (respond (create-account request)))))
+    ([request respond raise]
+     (try
+       (respond (create-account request))
+       (catch Exception e
+         (raise e))))))
+
+(defmethod ig/init-key ::show [_ {:keys [cache]}]
+  (fn show-account
+    ([{:as _request
+       {{:keys [id]} :path} :parameters}]
+     (if-let [account (cache/fetch-account cache id)]
+       {:status 200
+        :body account}
+       {:status 404}))
+    ([request respond raise]
+     (try
+       (respond (show-account request))
+       (catch Exception e
+         (raise e))))))

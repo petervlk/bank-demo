@@ -12,8 +12,13 @@
 
 (defn add-account
   [cache {:keys [account-number] :as account}]
-  (log/debug "CACHE: Add account" account)
+  (log/debug "CACHE: Adding account" account)
   (swap! cache assoc account-number account))
+
+(defn fetch-account
+  [cache account-number]
+  (log/debugf "CACHE: Fetching account #%s" account-number)
+  (get @cache account-number))
 
 (defmethod ig/init-key ::simple-cache [_ {:keys [datasource]}]
   (atom (init-cache datasource)))
