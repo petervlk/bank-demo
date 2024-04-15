@@ -26,19 +26,19 @@
 
 (deftest transaction-audit-schema-test
   (testing "valid data"
-    (is (true? (m/validate sut/TransactionAudit {:sequence    0
-                                                 :debit       100
-                                                 :description "deposit"})))
-    (is (true? (m/validate sut/TransactionAudit {:sequence    1
-                                                 :credit      2000
-                                                 :description "withdrawal"}))))
+    (is (true? (m/validate sut/AccountTransactionReport {:sequence    0
+                                                         :debit       100
+                                                         :description "deposit"})))
+    (is (true? (m/validate sut/AccountTransactionReport {:sequence    1
+                                                         :credit      2000
+                                                         :description "withdrawal"}))))
   (testing "invalid data"
-    (is (false? (m/validate sut/TransactionAudit {:sequence    2
-                                                  :description "none"})))
-    (is (false? (m/validate sut/TransactionAudit {:sequence    3
-                                                  :credit      24
-                                                  :debit       42
-                                                  :description "both"})))))
+    (is (false? (m/validate sut/AccountTransactionReport {:sequence    2
+                                                          :description "none"})))
+    (is (false? (m/validate sut/AccountTransactionReport {:sequence    3
+                                                          :credit      24
+                                                          :debit       42
+                                                          :description "both"})))))
 
 (comment
   (require '[malli.generator :as mg])
@@ -46,7 +46,7 @@
   (mg/generate sut/Account)
   ;; => {:account-number 869, :name "0975SMzn449C0", :balance 1745}
 
-  (mg/generate sut/TransactionAudit)
+  (mg/generate sut/AccountTransactionReport)
   ;; => {:sequence 177, :description "23d0r5X", :credit 3}
   ;; => {:sequence 29, :description "mpp46bjln90rwYkfd5Pa7d8az", :debit 3}
 
@@ -54,5 +54,11 @@
   ;; => [{:sequence 54268, :description "j92O49Ugb1m2", :debit 191}
   ;;     {:sequence 50490, :description "7C8bP0", :credit 262}
   ;;     {:sequence 446061, :description "Jid64", :debit 4197733}]
+
+  (mg/generate sut/Transaction)
+  ;; => {:account-source nil,
+  ;;     :account-destination 118425804,
+  ;;     :amount 1420,
+  ;;     :timestamp 883697515}
 
   *e)

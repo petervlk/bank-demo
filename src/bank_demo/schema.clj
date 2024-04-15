@@ -31,16 +31,18 @@
    [:name #'AccountHolderName]
    [:balance #'AccountBalance]])
 
-(def TransactionAudit
+(def TransactionAmount #'PosInt)
+
+(def AccountTransactionReport
   (let [base [:map {:closed true}
               [:sequence #'NatInt]
               [:description #'NonEmptyString]]]
     [:or
-     (mu/assoc base :credit #'PosInt)
-     (mu/assoc base :debit #'PosInt)]))
+     (mu/assoc base :credit #'TransactionAmount)
+     (mu/assoc base :debit  #'TransactionAmount)]))
 
 (def AccountAudit
-  [:vector TransactionAudit])
+  [:vector AccountTransactionReport])
 
 (def TransactionRequest
   [:map
@@ -51,3 +53,16 @@
 
 (def TransferRequest
   (mu/assoc TransactionRequest :account-number #'AccountId))
+
+(def TransactionTimestamp #'NatInt) ; (.toEpochMilli (java.time.Instant/now))
+
+(def Transaction
+  [:and
+   [:map
+    [:account-source [:maybe #'AccountId]]
+    [:account-destination [:maybe #'AccountId]]
+    [:amount #'TransactionAmount]
+    [:timestamp #'TransactionTimestamp]]
+   [:fn {:error/message "Source and/or destination accounts must be specified!"}
+    (fn [{:keys [account-source account-destination]}]
+      (or account-source account-destination))]])
