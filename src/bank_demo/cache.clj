@@ -20,5 +20,15 @@
   (log/debugf "CACHE: Fetching account #%s" account-number)
   (get @cache account-number))
 
+(defn fetch-account-info
+  [cache account-number]
+  (some-> (fetch-account cache account-number)
+          (dissoc :transactions)))
+
+(defn fetch-account-transactions
+  [cache account-number]
+  (some-> (fetch-account cache account-number)
+          (get :transactions [])))
+
 (defmethod ig/init-key ::simple-cache [_ {:keys [datasource]}]
   (atom (init-cache datasource)))

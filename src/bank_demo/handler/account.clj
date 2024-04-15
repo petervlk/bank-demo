@@ -24,12 +24,20 @@
   (fn show-account
     ([{:as _request
        {{:keys [id]} :path} :parameters}]
-     (if-let [account (cache/fetch-account cache id)]
+     (if-let [account (cache/fetch-account-info cache id)]
        {:status 200
         :body account}
        {:status 404}))
-    ([request respond raise]
-     (try
-       (respond (show-account request))
-       (catch Exception e
-         (raise e))))))
+    ([request respond _raise]
+     (respond (show-account request)))))
+
+(defmethod ig/init-key ::audit [_ {:keys [cache]}]
+  (fn audit-account
+    ([{:as _request
+       {{:keys [id]} :path} :parameters}]
+     (if-let [trxs (cache/fetch-account-transactions cache id)]
+       {:status 200
+        :body trxs}
+       {:status 404}))
+    ([request respond _raise]
+     (respond (audit-account request)))))

@@ -16,20 +16,6 @@
   ([data]
    (merge (mg/generate schema/Account) data)))
 
-(defn- dummy-audit
-  []
-  (map-indexed
-    (fn [idx audit-item] (assoc audit-item :sequence idx))
-    (mg/generate schema/AccountAudit)))
-
-(defn audit-account
-  ([{:as _request
-     {{:keys [id]} :path} :parameters}]
-   {:status 200
-    :body   (dummy-audit)})
-  ([request respond _raise]
-   (respond (audit-account request))))
-
 (defn deposit-funds
   ([{:as _request
      {{:keys [id]}     :path
@@ -57,7 +43,9 @@
   ([request respond _raise]
    (respond (deposit-funds request))))
 
-(defmethod ig/init-key ::router [_ {:keys [create-account show-account]}]
+(defmethod ig/init-key ::router [_ {:keys [create-account
+                                           show-account
+                                           audit-account]}]
   (ring/router
     [["/account"
       ["" {:post {:parameters {:body schema/CreateAccountRequest}
@@ -86,7 +74,7 @@
        ["/audit"
         {:get {:parameters {:path schema/PathParamsAccountId}
                :responses  {200 {:body schema/AccountAudit}}
-               :handler    #'audit-account}}]]]]
+               :handler    audit-account}}]]]]
     {:data {:muuntaja   muuntaja.core/instance
             :coercion   reitit.coercion.malli/coercion
             :middleware [mw-muuntaja/format-middleware
