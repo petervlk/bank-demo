@@ -1,47 +1,14 @@
 (ns bank-demo.handler
   (:require
+    [bank-demo.handler.transaction :as trx]
     [bank-demo.schema :as schema]
     [integrant.core :as ig]
-    [malli.generator :as mg]
     [muuntaja.core]
     [reitit.coercion.malli]
     [reitit.ring :as ring]
     [reitit.ring.coercion :as rrc]
     [reitit.ring.middleware.exception :as mw-exception]
     [reitit.ring.middleware.muuntaja :as mw-muuntaja]))
-
-(defn- dummy-account
-  ([]
-   (mg/generate schema/Account))
-  ([data]
-   (merge (mg/generate schema/Account) data)))
-
-(defn deposit-funds
-  ([{:as _request
-     {{:keys [id]}     :path
-      {:keys [amount]} :body} :parameters}]
-   {:status 200
-    :body   (dummy-account {:account-number id :balance amount})})
-  ([request respond _raise]
-   (respond (deposit-funds request))))
-
-(defn withdraw-funds
-  ([{:as _request
-     {{:keys [id]}     :path
-      {:keys [amount]} :body} :parameters}]
-   {:status 200
-    :body (dummy-account {:account-number id :balance amount})})
-  ([request respond _raise]
-   (respond (withdraw-funds request))))
-
-(defn transfer-funds
-  ([{:as _request
-     {{:keys [id]}     :path
-      {:keys [amount account-number]} :body} :parameters}]
-   {:status 200
-    :body (dummy-account {:account-number id :balance amount})})
-  ([request respond _raise]
-   (respond (deposit-funds request))))
 
 (defmethod ig/init-key ::router [_ {:keys [create-account
                                            show-account
@@ -60,17 +27,17 @@
         {:post {:parameters {:path schema/PathParamsAccountId
                              :body schema/DepositRequest}
                 :responses  {200 {:body schema/Account}}
-                :handler    #'deposit-funds}}]
+                :handler    #'trx/deposit-funds}}]
        ["/withdraw"
         {:post {:parameters {:path schema/PathParamsAccountId
                              :body schema/WithdrawalRequest}
                 :responses  {200 {:body schema/Account}}
-                :handler    #'withdraw-funds}}]
+                :handler    #'trx/withdraw-funds}}]
        ["/send"
         {:post {:parameters {:path schema/PathParamsAccountId
                              :body schema/TransferRequest}
                 :responses  {200 {:body schema/Account}}
-                :handler    #'transfer-funds}}]
+                :handler    #'trx/transfer-funds}}]
        ["/audit"
         {:get {:parameters {:path schema/PathParamsAccountId}
                :responses  {200 {:body schema/AccountAudit}}
