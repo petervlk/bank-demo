@@ -1,7 +1,8 @@
 {:bank-demo.db/datasource {:adapter "h2"
                            :url     "jdbc:h2:/tmp/bank-demo"}
  :bank-demo.db/populator {:datasource #ig/ref :bank-demo.db/datasource}
- :bank-demo.handler/router {}
+ :bank-demo.handler.account/create {:datasource #ig/ref :bank-demo.db/datasource}
+ :bank-demo.handler/router {:create-account #ig/ref :bank-demo.handler.account/create}
  :bank-demo.handler/default-handler {}
  :bank-demo.handler/app {:router #ig/ref :bank-demo.handler/router
                          :default-handler #ig/ref :bank-demo.handler/default-handler

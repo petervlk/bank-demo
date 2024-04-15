@@ -2,7 +2,8 @@
   (:require
     [next.jdbc :as jdbc]
     [next.jdbc.result-set :as rs]
-    [next.jdbc.sql :as sql]))
+    [next.jdbc.sql :as sql]
+    [taoensso.timbre :as log]))
 
 (defn create-account-table!
   [ds]
@@ -15,6 +16,7 @@ CREATE TABLE IF NOT EXISTS account (
 
 (defn create-account!
   [ds account-holder-name]
+  (log/debugf "Creating account: %s" account-holder-name)
   (when-let [account (sql/insert! ds :account {:name account-holder-name}
                                   {:return-keys true
                                    :builder-fn rs/as-unqualified-kebab-maps})]

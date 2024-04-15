@@ -30,14 +30,6 @@
   ([request respond _raise]
    (respond (audit-account request))))
 
-(defn create-account
-  ([{:as _request
-     {{:keys [name]} :body} :parameters}]
-   {:status 201
-    :body   (dummy-account {:name name :balance 0})})
-  ([request respond _raise]
-   (respond (create-account request))))
-
 (defn show-account
   ([{:as _request
      {{:keys [id]} :path} :parameters}]
@@ -73,12 +65,12 @@
   ([request respond _raise]
    (respond (deposit-funds request))))
 
-(defmethod ig/init-key ::router [_ _]
+(defmethod ig/init-key ::router [_ {:keys [create-account]}]
   (ring/router
     [["/account"
       ["" {:post {:parameters {:body schema/CreateAccountRequest}
                   :responses {201 {:body schema/Account}}
-                  :handler #'create-account}}]
+                  :handler create-account}}]
       ["/:id"
        [""
         {:get {:parameters {:path schema/PathParamsAccountId}
