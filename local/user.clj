@@ -3,7 +3,8 @@
     [bank-demo.core :refer [load-config! load-namespaces]]
     [hato.client :as hc]
     [integrant.core :as ig]
-    [integrant.repl :as ig-repl]))
+    [integrant.repl :as ig-repl]
+    [taoensso.timbre :as log]))
 
 (ig-repl/set-prep!
   (fn []
@@ -37,6 +38,10 @@
   (ig-repl/reset)
 
 
+  (log/set-level! :info)
+  (log/set-level! :debug)
+
+  ;; API
   (async-response
     (hc/post
       (url "/account")
