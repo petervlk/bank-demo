@@ -1,7 +1,9 @@
 {:bank-demo.db/datasource {:adapter "h2"
                            :url     "jdbc:h2:/tmp/bank-demo"}
+ :bank-demo.db/populator {:datasource #ig/ref :bank-demo.db/datasource}
  :bank-demo.handler/router {}
  :bank-demo.handler/default-handler {}
  :bank-demo.handler/app {:router #ig/ref :bank-demo.handler/router
-                         :default-handler #ig/ref :bank-demo.handler/default-handler}
+                         :default-handler #ig/ref :bank-demo.handler/default-handler
+                         :populator #ig/ref :bank-demo.db/populator}
  :bank-demo/server  {:port 9010 :handler #ig/ref :bank-demo.handler/app}}
