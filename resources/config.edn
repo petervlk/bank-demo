@@ -11,11 +11,14 @@
                                          :cache #ig/ref :bank-demo.cache/simple-cache}
  :bank-demo.handler.transaction/withdraw {:datasource #ig/ref :bank-demo.db/datasource
                                           :cache #ig/ref :bank-demo.cache/simple-cache}
+ :bank-demo.handler.transaction/transfer {:datasource #ig/ref :bank-demo.db/datasource
+                                          :cache #ig/ref :bank-demo.cache/simple-cache}
  :bank-demo.handler/router {:create-account #ig/ref :bank-demo.handler.account/create
                             :show-account #ig/ref :bank-demo.handler.account/show
                             :audit-account #ig/ref :bank-demo.handler.account/audit
                             :deposit-funds #ig/ref :bank-demo.handler.transaction/deposit
-                            :withdraw-funds #ig/ref :bank-demo.handler.transaction/withdraw}
+                            :withdraw-funds #ig/ref :bank-demo.handler.transaction/withdraw
+                            :transfer-funds #ig/ref :bank-demo.handler.transaction/transfer}
  :bank-demo.handler/default-handler {}
  :bank-demo.handler/app {:router #ig/ref :bank-demo.handler/router
                          :default-handler #ig/ref :bank-demo.handler/default-handler

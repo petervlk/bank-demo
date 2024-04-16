@@ -1,6 +1,5 @@
 (ns bank-demo.handler
   (:require
-    [bank-demo.handler.transaction :as trx]
     [bank-demo.schema :as schema]
     [integrant.core :as ig]
     [muuntaja.core]
@@ -14,7 +13,8 @@
                                            show-account
                                            audit-account
                                            deposit-funds
-                                           withdraw-funds]}]
+                                           withdraw-funds
+                                           transfer-funds]}]
   (ring/router
     [["/account"
       ["" {:post {:parameters {:body schema/CreateAccountRequest}
@@ -39,7 +39,7 @@
         {:post {:parameters {:path schema/PathParamsAccountId
                              :body schema/TransferRequest}
                 :responses  {200 {:body schema/Account}}
-                :handler    #'trx/transfer-funds}}]
+                :handler    transfer-funds}}]
        ["/audit"
         {:get {:parameters {:path schema/PathParamsAccountId}
                :responses  {200 {:body schema/AccountAudit}}

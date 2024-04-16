@@ -2,19 +2,11 @@
   (:require
     [bank-demo.cache :as cache]
     [bank-demo.db.transaction :as db]
-    [bank-demo.schema :as schema]
-    [integrant.core :as ig]
-    [malli.generator :as mg]))
+    [integrant.core :as ig]))
 
 (defn- trx-timestamped
   [trx]
   (assoc trx :timestamp (.toEpochMilli (java.time.Instant/now))))
-
-(defn- dummy-account
-  ([]
-   (mg/generate schema/Account))
-  ([data]
-   (merge (mg/generate schema/Account) data)))
 
 (defmethod ig/init-key ::deposit [_ {:keys [datasource cache]}]
   (fn deposit-funds
@@ -53,18 +45,38 @@
         :body   (-> (cache/add-transaction cache trx)
                     (get id)
                     (dissoc :transactions))}
-       (throw (ex-info "Failed to deposit funds" {:account-number id :amount amount}))))
+       (throw (ex-info "Failed to withdraw funds" {:account-number id :amount amount}))))
     ([request respond raise]
      (try
        (respond (withdraw-funds request))
        (catch Exception e
          (raise e))))))
 
-(defn transfer-funds
-  ([{:as _request
-     {{:keys [id]}     :path
-      {:keys [amount _account-number]} :body} :parameters}]
-   {:status 200
-    :body (dummy-account {:account-number id :balance amount})})
-  ([request respond _raise]
-   (respond (transfer-funds request))))
+(defmethod ig/init-key ::transfer [_ {:keys [datasource cache]}]
+  (fn transfer-funds
+    ([{:as _request
+       {{account-source :id}     :path
+        {amount :amount account-destination :account-number} :body} :parameters}]
+     (if-let [trx (->> {:amount amount
+                        :account-source account-source
+                        :account-destination account-destination}
+                       (trx-timestamped)
+                       ;; TODO - these validations and modifications of cache need to be atomic
+                       (cache/transaction-accounts-exsist? cache)
+                       (cache/sufficient-funds? cache)
+                       (db/store-transaction! datasource))]
+       {:status 200
+        ;; TODO - refactor transaction fetching
+        :body   (-> (cache/add-transaction cache trx)
+                    (get account-source)
+                    (dissoc :transactions))}
+       (throw (ex-info
+                "Failed to transfer funds"
+                {:account-source account-source
+                 :account-destination account-destination
+                 :amount amount}))))
+    ([request respond raise]
+     (try
+       (respond (transfer-funds request))
+       (catch Exception e
+         (raise e))))))
