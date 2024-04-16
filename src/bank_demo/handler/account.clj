@@ -25,7 +25,7 @@
   (fn show-account
     ([{:as _request
        {{:keys [id]} :path} :parameters}]
-     (if-let [account (cache/account-report cache id)]
+     (if-let [account (cache/account-report @cache id)]
        {:status 200
         :body account}
        {:status 404}))
@@ -37,7 +37,7 @@
     ([{:as _request
        {{:keys [id]} :path} :parameters}]
      (if-let [trxs (->>
-                     (cache/account-transactions-report cache id)
+                     (cache/account-transactions-report @cache id)
                      (sort-by :timestamp)
                      (map #(transaction/transaction-report id %))
                      (map-indexed (fn [idx trx] (assoc trx :sequence idx)))

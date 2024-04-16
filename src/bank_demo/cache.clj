@@ -45,15 +45,15 @@
   (get cache-data account-number))
 
 (defn account-report
-  [cache account-number]
+  [cache-data account-number]
   (log/debugf "CACHE: Fetching account report #%s" account-number)
-  (some-> (fetch-account @cache account-number)
+  (some-> (fetch-account cache-data account-number)
           (dissoc :transactions)))
 
 (defn account-transactions-report
-  [cache account-number]
+  [cache-data account-number]
   (log/debugf "CACHE: Fetching account transactions report #%s" account-number)
-  (some-> (fetch-account @cache account-number)
+  (some-> (fetch-account cache-data account-number)
           (get :transactions [])))
 
 (defn transaction-accounts-exsist?
