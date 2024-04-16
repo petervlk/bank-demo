@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS account (
   account_number int auto_increment primary key,
   name varchar(50) not null,
   balance int default 0
-)"] jdbc/unqualified-snake-kebab-opts))
+)"] jdbc/unqualified-snake-kebab-opts)
+  [:account-table :ready])
 
 (defn create-account!
   [ds account-holder-name]

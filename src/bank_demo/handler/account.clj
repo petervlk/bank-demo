@@ -24,7 +24,7 @@
   (fn show-account
     ([{:as _request
        {{:keys [id]} :path} :parameters}]
-     (if-let [account (cache/fetch-account-info cache id)]
+     (if-let [account (cache/account-report cache id)]
        {:status 200
         :body account}
        {:status 404}))
@@ -35,7 +35,7 @@
   (fn audit-account
     ([{:as _request
        {{:keys [id]} :path} :parameters}]
-     (if-let [trxs (cache/fetch-account-transactions cache id)]
+     (if-let [trxs (cache/account-transactions-report cache id)]
        {:status 200
         :body trxs}
        {:status 404}))

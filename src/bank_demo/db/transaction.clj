@@ -20,13 +20,11 @@ CREATE TABLE IF NOT EXISTS transaction (
   CHECK(account_destination != account_source)
 )"]))
 
-(defn create-transaction!
+(defn store-transaction!
   [ds transaction]
-  (log/debug "DB: Creating transaction" transaction)
-  (let [epoch-milli (.toEpochMilli (java.time.Instant/now))
-        trx (assoc transaction :timestamp epoch-milli)]
-    (sql/insert! ds :transaction trx jdbc/unqualified-snake-kebab-opts)
-    trx))
+  (log/debug "DB: Store transaction" transaction)
+  (sql/insert! ds :transaction transaction jdbc/unqualified-snake-kebab-opts)
+  transaction)
 
 (defn get-all-transactions
   [ds]
