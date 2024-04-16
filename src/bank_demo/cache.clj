@@ -1,15 +1,39 @@
 (ns bank-demo.cache
   (:require
     [bank-demo.db.account :as account]
+    [bank-demo.db.transaction :as transaction]
     [integrant.core :as ig]
     [taoensso.timbre :as log]))
+
+(defn- update-balances
+  [cache-data {:keys [account-source account-destination amount]}]
+  (cond-> cache-data
+    account-source (update-in [account-source :balance] - amount)
+    account-destination (update-in [account-destination :balance] + amount)))
+
+(defn- update-transactions
+  [cache-data {:keys [account-source account-destination] :as trx}]
+  (cond-> cache-data
+    account-source (update-in [account-source :transactions] conj trx)
+    account-destination (update-in [account-destination :transactions] conj trx)))
+
+(defn- trx-to-accounts
+  [cache-data trx]
+  (-> cache-data
+      (update-transactions trx)
+      (update-balances trx)))
+
+(defn add-transaction
+  [cache transaction]
+  (swap! cache trx-to-accounts transaction))
 
 ;; TODO add schema for cache
 (defn init-cache
   [datasource]
-  (into {}
-        (map (juxt :account-number identity))
-        (account/get-all-accounts datasource)))
+  (let [accounts (account/get-all-accounts datasource)
+        transactions (transaction/get-all-transactions datasource)
+        cached-accounts (into {} (map (juxt :account-number identity)) accounts)]
+    (reduce trx-to-accounts cached-accounts transactions)))
 
 (defn add-account
   [cache {:keys [account-number] :as account}]
@@ -46,25 +70,6 @@
     (if (> amount (get-in data [account-source :balance] 0))
       (throw (ex-info "CACHE: Illegal transaction data." {:error "Insufficient funds in source account"}))
       transaction)))
-
-(defn add-transaction
-  [cache transaction]
-  (letfn [(update-balances
-            [cache-data {:keys [account-source account-destination amount]}]
-            (cond-> cache-data
-              account-source (update-in [account-source :balance] - amount)
-              account-destination (update-in [account-destination :balance] + amount)))
-          (update-transactions
-            [cache-data {:keys [account-source account-destination] :as trx}]
-            (cond-> cache-data
-              account-source (update-in [account-source :transactions] conj trx)
-              account-destination (update-in [account-destination :transactions] conj trx)))
-          (trx-to-accounts
-            [cache-data trx]
-            (-> cache-data
-                (update-transactions trx)
-                (update-balances trx)))]
-    (swap! cache trx-to-accounts transaction)))
 
 (defmethod ig/init-key ::simple-cache [_ {:keys [datasource]}]
   (atom (init-cache datasource)))
