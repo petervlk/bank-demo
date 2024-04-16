@@ -16,8 +16,9 @@
  :aliases
  {:run-m {:main-opts ["-m" "bank-demo.core"]}
   :local {:extra-paths ["local"]
-          :extra-deps  {integrant/repl {:mvn/version "0.3.3"}
-                        hato/hato      {:mvn/version "0.9.0"}}}
+          :extra-deps  {integrant/repl           {:mvn/version "0.3.3"}
+                        hato/hato                {:mvn/version "0.9.0"}
+                        com.github.mhjort/trombi {:mvn/version "1.0.1"}}}
   :test  {:extra-paths ["test"]
           :extra-deps  {lambdaisland/kaocha    {:mvn/version "1.88.1376"}
                         org.clojure/test.check {:mvn/version "1.1.1"}
