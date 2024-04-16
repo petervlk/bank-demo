@@ -1,7 +1,7 @@
 (ns bank-demo.db
   (:require
-    [bank-demo.db.account :as account]
-    [bank-demo.db.transaction :as transaction]
+    [bank-demo.db.account :refer [create-account-table!]]
+    [bank-demo.db.transaction :refer [create-transaction-table!]]
     [hikari-cp.core :as hikari]
     [integrant.core :as ig]
     [taoensso.timbre :as log]))
@@ -15,5 +15,4 @@
   (hikari/close-datasource datasource))
 
 (defmethod ig/init-key ::populator [_ {:keys [datasource]}]
-  {:account     (account/create-account-table! datasource)
-   :transaction (transaction/create-transaction-table! datasource)})
+  (mapv #(% datasource) [create-account-table! create-transaction-table!]))

@@ -1,7 +1,6 @@
 (ns bank-demo.handler.transaction
   (:require
     [bank-demo.schema :as schema]
-    [integrant.core :as ig]
     [malli.generator :as mg]
     [muuntaja.core]
     [reitit.coercion.malli]))
@@ -33,7 +32,7 @@
 (defn transfer-funds
   ([{:as _request
      {{:keys [id]}     :path
-      {:keys [amount account-number]} :body} :parameters}]
+      {:keys [amount _account-number]} :body} :parameters}]
    {:status 200
     :body (dummy-account {:account-number id :balance amount})})
   ([request respond _raise]

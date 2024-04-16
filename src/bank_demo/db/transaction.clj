@@ -51,34 +51,3 @@ CREATE TABLE IF NOT EXISTS transaction (
       (audited? account-destination)
       {:credit amount
        :description "deposit"})))
-
-(comment
-
-  (require 'integrant.repl.state)
-
-  (defn ds []
-    (:bank-demo.db/datasource integrant.repl.state/system))
-
-  (create-transaction-table! (ds))
-
-  (sql/insert! (ds) :transaction
-               {
-                :amount 51
-                :account-source 1
-                :account-destination 2
-                :timestamp 10}
-               jdbc/unqualified-snake-kebab-opts)
-
-  (get-all-transactions (ds))
-  
-  (create-transaction!
-    (ds)
-    {:amount              51
-     :account-source      1
-     :account-destination 2})
-
-  (.toEpochMilli (java.time.Instant/now))
-
-  (:bank-demo.db/populator integrant.repl.state/system)
-
-  *e)
