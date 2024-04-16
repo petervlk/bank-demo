@@ -37,14 +37,28 @@
        (catch Exception e
          (raise e))))))
 
-(defn withdraw-funds
-  ([{:as _request
-     {{:keys [id]}     :path
-      {:keys [amount]} :body} :parameters}]
-   {:status 200
-    :body (dummy-account {:account-number id :balance amount})})
-  ([request respond _raise]
-   (respond (withdraw-funds request))))
+(defmethod ig/init-key ::withdraw [_ {:keys [datasource cache]}]
+  (fn withdraw-funds
+    ([{:as _request
+       {{:keys [id]}     :path
+        {:keys [amount]} :body} :parameters}]
+     (if-let [trx (->> {:amount amount :account-source id}
+                       (trx-timestamped)
+                       ;; TODO - these validations and modifications of cache need to be atomic
+                       (cache/transaction-accounts-exsist? cache)
+                       (cache/sufficient-funds? cache)
+                       (db/store-transaction! datasource))]
+       {:status 200
+        ;; TODO - refactor transaction fetching
+        :body   (-> (cache/add-transaction cache trx)
+                    (get id)
+                    (dissoc :transactions))}
+       (throw (ex-info "Failed to deposit funds" {:account-number id :amount amount}))))
+    ([request respond raise]
+     (try
+       (respond (withdraw-funds request))
+       (catch Exception e
+         (raise e))))))
 
 (defn transfer-funds
   ([{:as _request

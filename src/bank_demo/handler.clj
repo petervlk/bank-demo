@@ -13,7 +13,8 @@
 (defmethod ig/init-key ::router [_ {:keys [create-account
                                            show-account
                                            audit-account
-                                           deposit-funds]}]
+                                           deposit-funds
+                                           withdraw-funds]}]
   (ring/router
     [["/account"
       ["" {:post {:parameters {:body schema/CreateAccountRequest}
@@ -33,7 +34,7 @@
         {:post {:parameters {:path schema/PathParamsAccountId
                              :body schema/WithdrawalRequest}
                 :responses  {200 {:body schema/Account}}
-                :handler    #'trx/withdraw-funds}}]
+                :handler    withdraw-funds}}]
        ["/send"
         {:post {:parameters {:path schema/PathParamsAccountId
                              :body schema/TransferRequest}

@@ -38,7 +38,14 @@
            (filter identity)
            (every? #(contains? @cache %)))
     transaction
-    (throw (ex-info "CACHE: Invalid transaction data." {:error "Account refs invalid"}))))
+    (throw (ex-info "CACHE: Illegal transaction data." {:error "Account refs invalid"}))))
+
+(defn sufficient-funds?
+  [cache {:keys [account-source amount] :as transaction}]
+  (let [data @cache]
+    (if (> amount (get-in data [account-source :balance] 0))
+      (throw (ex-info "CACHE: Illegal transaction data." {:error "Insufficient funds in source account"}))
+      transaction)))
 
 (defn add-transaction
   [cache transaction]
