@@ -33,11 +33,24 @@ CREATE TABLE IF NOT EXISTS transaction (
   (sql/query ds ["select * from transaction"] jdbc/unqualified-snake-kebab-opts))
 
 (defn transaction-report
-  [{from   :account-source
-    to     :account-destination
-    amount :amount}]
-  ;; TODO
-  (throw (ex-info "Not yet implemented" {:msg "missing implementation"})))
+  [audited-account {:keys [account-source account-destination amount] :as trx}]
+  (letfn [(audited? [account-number]
+            (= audited-account account-number))
+          (transfer? [{:keys [account-source account-destination]}]
+            (and account-source account-destination))]
+    (cond
+      (and (transfer? trx) (audited? account-source))
+      {:debit amount
+       :description (str "send to #" account-destination)}
+      (and (transfer? trx) (audited? account-destination))
+      {:credit amount
+       :description (str "receive from #" account-source)}
+      (audited? account-source)
+      {:debit amount
+       :description "withdraw"}
+      (audited? account-destination)
+      {:credit amount
+       :description "deposit"})))
 
 (comment
 
